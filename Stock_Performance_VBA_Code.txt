@@ -1,0 +1,138 @@
+Sub Stock_Yearly_Analyze()
+    
+    Dim ws As Worksheet
+    Dim ticker As String
+    Dim openprice As Double
+    Dim closeprice As Double
+    Dim vol As Double
+    Dim yearlychange As Double
+    Dim perchange As Double
+    Dim totalvol As Double
+    Dim j As Integer
+    Dim lastRow As Long
+    
+    ' initial workbook to go through each worksheet
+    For Each ws In ThisWorkbook.Worksheets
+             
+        Set ws = ThisWorkbook.Sheets(ws.Name)
+        
+        ' set lastRow as end of column A
+        lastRow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+        
+        ' set title for the analize solution
+        ws.Range("I1").Value = "Ticker"
+        ws.Range("J1").Value = "Yearly Change"
+        ws.Range("K1").Value = "Percent Change"
+        ws.Range("L1").Value = "Total Stock Volume"
+        
+        j = 1
+        totalvol = 0
+        
+        ' go through each row to compare and find each ticker, volume, calculate percent change
+        For i = 2 To lastRow
+    
+            ticker = ws.Cells(i, 1).Value
+            vol = ws.Cells(i, 7).Value
+        
+            If ticker = ws.Cells(i - 1, 1).Value Then
+    
+                closeprice = ws.Cells(i, 6).Value
+                totalvol = totalvol + vol
+    
+            Else
+                totalvol = 0
+                j = j + 1
+                ticker = ws.Cells(i, 1).Value
+                openprice = ws.Cells(i, 3).Value
+                totalvol = totalvol + vol
+    
+            End If
+    
+            ws.Cells(j, 9).Value = ticker
+        
+            ' calculate yearly change and format number to 0.00
+            yearlychange = closeprice - openprice
+            ws.Cells(j, 10).Value = yearlychange
+            ws.Cells(j, 10).NumberFormat = "0.00"
+                
+                ' condition to format color change depends on increase or decrease
+                If ws.Cells(j, 10).Value >= 0 Then
+                    ws.Cells(j, 10).Interior.ColorIndex = 4
+                Else: ws.Cells(j, 10).Interior.ColorIndex = 3
+                End If
+        
+            ' calculate and format percent change
+            perchange = (yearlychange / openprice)
+            ws.Cells(j, 11).Value = perchange
+            ws.Cells(j, 11).NumberFormat = "0.00%"
+        
+            ws.Cells(j, 12).Value = totalvol
+        
+    
+        Next i
+        
+        ' set title for new column for part II
+        ws.Cells(2, 15).Value = "Greatest % Increase"
+        ws.Cells(3, 15).Value = "Greatest % Decrease"
+        ws.Cells(4, 15).Value = "Greatest Total Volume"
+        ws.Cells(1, 16).Value = "Ticker"
+        ws.Cells(1, 17).Value = "Value"
+    
+        Dim GreatInc As Double
+        Dim GreatDec As Double
+        Dim GreatVol As Double
+        Dim GreatIncTicker As String
+        Dim GreatDecTicker As String
+        Dim GreatVolTicker As String
+        
+        ' Find the last row in the data
+        lastRow = ws.Cells(ws.Rows.Count, "I").End(xlUp).Row
+        
+        ' Initialize variables
+        GreatInc = ws.Cells(2, 11).Value
+        GreatDec = ws.Cells(2, 11).Value
+        GreatVol = ws.Cells(2, 12).Value
+        
+        ' Loop through the data to find the greatest values
+        For i = 2 To lastRow
+            
+            ' Read data from columns K, L, and I
+            percentChange = ws.Cells(i, 11).Value
+            volume = ws.Cells(i, 12).Value
+            ticker = ws.Cells(i, 9).Value
+            
+            ' Find the greatest % increase
+            If percentChange > GreatInc Then
+                GreatInc = percentChange
+                GreatIncTicker = ticker
+            End If
+            
+            ' Find the greatest % decrease
+            If percentChange < GreatDec Then
+                GreatDec = percentChange
+                GreatDecTicker = ticker
+            End If
+            
+            ' Find the greatest total volume
+            If volume > GreatVol Then
+                GreatVol = volume
+                GreatVolTicker = ticker
+            End If
+        Next i
+    
+    ' Output the results to the specified cells
+    ws.Cells(2, 16).Value = GreatIncTicker
+    ws.Cells(3, 16).Value = GreatDecTicker
+    ws.Cells(4, 16).Value = GreatVolTicker
+    
+    ws.Cells(2, 17).Value = GreatInc
+    ws.Cells(2, 17).NumberFormat = "0.00%"
+    ws.Cells(3, 17).Value = GreatDec
+    ws.Cells(3, 17).NumberFormat = "0.00%"
+    ws.Cells(4, 17).Value = GreatVol
+    
+    Next ws
+ 
+
+End Sub
+
